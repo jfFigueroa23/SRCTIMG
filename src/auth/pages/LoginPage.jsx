@@ -1,11 +1,12 @@
-import { Box, Grid, Button, TextField, Typography, Link } from '@mui/material';
+import { Box, Grid, Button, TextField, Typography, Link, IconButton, CircularProgress } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { Google as GoogleIcon } from '@mui/icons-material';
+import { Google as GoogleIcon, Email as EmailIcon, Lock as LockIcon } from '@mui/icons-material';
 import { AuthLayout } from '../layout/AuthLayout';
 import { startGoogleSignIn, startLoginWithEmailPassword } from '../../store/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { Alert } from '@mui/material';
+import { useForms } from '../../hooks';
 
 const initialFormData = {
   email: '',
@@ -15,7 +16,7 @@ const initialFormData = {
 export const LoginPage = () => {
   const { status, errorMessage } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const { email, password, onInputChange } = useForm(initialFormData);
+  const { email, password, onInputChange } = useForms(initialFormData);
   const isAuthenticating = useMemo(() => status === 'checking', [status]);
 
   const onSubmit = (event) => {
@@ -39,23 +40,32 @@ export const LoginPage = () => {
           maxWidth: '400px',
           mx: 'auto', 
           my: 'auto', 
-          p: 2, 
+          p: 2,
+          animation: 'fadeInUp 0.5s ease-in-out', // Animación de entrada
         }}
       >
         <Typography variant="h4" align="center" gutterBottom>
-          Login
+          Iniciar Sesión
         </Typography>
-        <form onSubmit={onSubmit} className="animate__animated animate__fadeIn animate__faster">
-          <Grid container spacing={2}>
+        <form onSubmit={onSubmit}>
+          <Grid container spacing={2} alignItems="center">
             <Grid item xs={12}>
               <TextField
-                label="Correo"
+                label="Correo Electrónico"
                 type="email"
-                placeholder="correo@google.com"
+                placeholder="correo@gmail.com"
                 fullWidth
                 name="email"
                 value={email}
                 onChange={onInputChange}
+                InputProps={{
+                  startAdornment: (
+                    <IconButton disabled={isAuthenticating}>
+                      <EmailIcon />
+                    </IconButton>
+                  ),
+                }}
+                sx={{ transition: 'border-color 0.3s ease-in-out' }} // Efecto visual en el campo de entrada
               />
             </Grid>
 
@@ -68,6 +78,14 @@ export const LoginPage = () => {
                 name="password"
                 value={password}
                 onChange={onInputChange}
+                InputProps={{
+                  startAdornment: (
+                    <IconButton disabled={isAuthenticating}>
+                      <LockIcon />
+                    </IconButton>
+                  ),
+                }}
+                sx={{ transition: 'border-color 0.3s ease-in-out' }} // Efecto visual en el campo de entrada
               />
             </Grid>
 
@@ -79,7 +97,7 @@ export const LoginPage = () => {
 
             <Grid item xs={12}>
               <Button disabled={isAuthenticating} type="submit" variant="contained" fullWidth>
-                Login
+                {isAuthenticating ? <CircularProgress size={24} /> : "Iniciar Sesión"}
               </Button>
             </Grid>
 
@@ -90,14 +108,21 @@ export const LoginPage = () => {
                 fullWidth
                 onClick={onGoogleSignIn}
                 startIcon={<GoogleIcon />}
+                sx={{ transition: 'background-color 0.3s ease-in-out' }} // Efecto visual en el botón
               >
-                Iniciar sesión con Google
+                Iniciar Sesión con Google
               </Button>
             </Grid>
 
             <Grid item xs={12} sx={{ textAlign: 'right' }}>
               <Link component={RouterLink} color="inherit" to="/auth/register">
-                Crear una cuenta
+                ¿No tienes una cuenta? Regístrate aquí
+              </Link>
+            </Grid>
+
+            <Grid item xs={12} sx={{ textAlign: 'right' }}>
+              <Link component={RouterLink} color="inherit" to="/auth/Contrasena">
+                ¿Olvidaste tu contraseña?
               </Link>
             </Grid>
           </Grid>

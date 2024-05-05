@@ -1,34 +1,38 @@
-import { LogoutOutlined, MenuOutlined } from '@mui/icons-material'
-import { AppBar, Grid, IconButton, Toolbar, Typography } from '@mui/material'
-import { Link as RouerLink } from 'react-router-dom'
+import { AppBar, Button, Grid, IconButton, Toolbar, Typography } from '@mui/material';
+import { useDispatch } from 'react-redux';
+import { startLogout } from '../../store/auth';
+import { Link as RouterLink } from 'react-router-dom'; 
+import { Home, LogoutOutlined, MenuOutlined } from '@mui/icons-material';
 
 export const NavBar = () => {
-  return (
-    <AppBar
-     position='fixed'
-     
-    >
-        <Toolbar>
-            <IconButton
-                color='inherit'
-                edge="start"
-                sx={{ mr: 2, display: { sm: 'none' }}}
-            >
-                <MenuOutlined />
-            </IconButton>
+    const dispatch = useDispatch();
 
-            <Grid container direction="row" justifyContent='space-between' alignItems='center'>
-                <Typography variant='h6' noWrap component='div'> Inicio</Typography>
+    const onLogout = () => {
+        dispatch(startLogout());
+    }
 
-                <IconButton LinkComponent={ RouerLink } to='/auth/login' color='error'>
-                    <LogoutOutlined />
+    return (
+        <AppBar position='fixed'>
+            <Toolbar>
+                <IconButton color='inherit' edge="start" sx={{ mr: 2, display: { sm: 'none' }}}>
+                    <MenuOutlined />
                 </IconButton>
-                
 
-            </Grid>
-        </Toolbar>
+                <Grid container direction="row" justifyContent='space-between' alignItems='center'>
 
+                    <IconButton component={RouterLink} to="/inicio" color='icons' noWrap variant='h6'> 
+                        <Home/> 
+                    </IconButton>   
 
-    </AppBar>
-  )
+                    <Button component={RouterLink} to="/testuser" color='secondary' noWrap variant='h6'> 
+                        Usuario
+                    </Button>
+
+                    <IconButton onClick={onLogout} color='error'>
+                        <LogoutOutlined />
+                    </IconButton>
+                </Grid>
+            </Toolbar>
+        </AppBar>
+    )
 }

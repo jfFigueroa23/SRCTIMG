@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
-export const useForm = ( initialForm = {}, formValidations = {} ) => {
-  
+export const useForms = ( initialForm = {}, formValidations = {} ) => {
+
     const [ formState, setFormState ] = useState( initialForm );
     const [formvalidations, setFormValidations] = useState({});
 
@@ -10,7 +10,7 @@ export const useForm = ( initialForm = {}, formValidations = {} ) => {
     }, [ formState ])
 
     useEffect(() => {
-      setFormState( initialForm );
+        setFormState( initialForm );
     }, [initialForm])
     
 

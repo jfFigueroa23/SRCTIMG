@@ -1,33 +1,41 @@
 import { useState } from 'react';
-import { Box, Grid, Button, TextField, Typography, Link, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, Grid, TextField, Typography, Link, IconButton, MenuItem, CircularProgress } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { Google as GoogleIcon } from '@mui/icons-material';
+import { Google as GoogleIcon, Email as EmailIcon, Lock as LockIcon, Phone as PhoneIcon, CalendarToday as CalendarIcon, School as SchoolIcon, Person as PersonIcon } from '@mui/icons-material'; // Importar PersonIcon
 import { AuthLayout } from '../layout/AuthLayout';
 import { startGoogleSignIn, startCreatingUserWithEmailPassword } from '../../store/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { Alert } from '@mui/material';
+import { useForms } from '../../hooks';
 
 const initialFormData = {
+  name: '',
+  phone: '',
   email: '',
+  birthDate: '',
+  gender: '',
+  school: '',
   password: '',
   confirmPassword: '',
-  displayName: '',
-  gender: '',
 };
 
 export const RegisterPage = () => {
   const { errorMessage } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [passwordError, setPasswordError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const { 
-    email, 
+    name,
+    phone,
+    email,
+    birthDate,
+    gender,
+    school,
     password, 
     confirmPassword, 
-    displayName, 
-    gender, 
     onInputChange 
-  } = useForm(initialFormData);
+  } = useForms(initialFormData);
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -38,16 +46,23 @@ export const RegisterPage = () => {
       return;
     }
 
-    // Resetear el mensaje de error
+    // Resetear el mensaje de error y establecer el estado de registro
     setPasswordError('');
+    setIsRegistering(true);
 
     // Dispatch de la acción de registro
-    dispatch(startCreatingUserWithEmailPassword({ 
-      email, 
+    await dispatch(startCreatingUserWithEmailPassword({ 
+      name,
+      phone,
+      email,
+      birthDate,
+      gender,
+      school,
       password, 
-      displayName, 
-      gender, 
     }));
+
+    // Restablecer el estado de registro
+    setIsRegistering(false);
   };
 
   const onGoogleSignIn = () => {
@@ -67,21 +82,38 @@ export const RegisterPage = () => {
           mx: 'auto',
           my: 'auto',
           p: 2,
+          animation: 'fadeInUp 0.5s ease-in-out',
         }}
       >
         <Typography variant="h4" align="center" gutterBottom>
           Registro
         </Typography>
-        <form onSubmit={onSubmit} className="animate__animated animate__fadeIn animate__faster">
+        <form onSubmit={onSubmit}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
                 label="Nombre"
                 type="text"
                 fullWidth
-                name="displayName"
-                value={displayName}
+                name="name"
+                value={name}
                 onChange={onInputChange}
+                InputProps={{
+                  startAdornment: <IconButton><LockIcon /></IconButton>,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Teléfono"
+                type="tel"
+                fullWidth
+                name="phone"
+                value={phone}
+                onChange={onInputChange}
+                InputProps={{
+                  startAdornment: <IconButton><PhoneIcon /></IconButton>,
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -92,6 +124,53 @@ export const RegisterPage = () => {
                 name="email"
                 value={email}
                 onChange={onInputChange}
+                InputProps={{
+                  startAdornment: <IconButton><EmailIcon /></IconButton>,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Fecha de nacimiento"
+                type="date"
+                fullWidth
+                name="birthDate"
+                value={birthDate}
+                onChange={onInputChange}
+                InputProps={{
+                  startAdornment: <IconButton><CalendarIcon /></IconButton>,
+                }}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                select
+                label="Género"
+                fullWidth
+                name="gender"
+                value={gender}
+                onChange={onInputChange}
+                InputProps={{
+                  startAdornment: <IconButton><PersonIcon /></IconButton>, // Cambiar a PersonIcon
+                }}
+              >
+                <MenuItem value="masculino">Masculino</MenuItem>
+                <MenuItem value="femenino">Femenino</MenuItem>
+                <MenuItem value="otro">Otro</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Escuela"
+                type="text"
+                fullWidth
+                name="school"
+                value={school}
+                onChange={onInputChange}
+                InputProps={{
+                  startAdornment: <IconButton><SchoolIcon /></IconButton>,
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -102,6 +181,9 @@ export const RegisterPage = () => {
                 name="password"
                 value={password}
                 onChange={onInputChange}
+                InputProps={{
+                  startAdornment: <IconButton><LockIcon /></IconButton>,
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -114,21 +196,10 @@ export const RegisterPage = () => {
                 onChange={onInputChange}
                 error={passwordError !== ''}
                 helperText={passwordError}
+                InputProps={{
+                  startAdornment: <IconButton><LockIcon /></IconButton>,
+                }}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Género"
-                fullWidth
-                name="gender"
-                value={gender}
-                onChange={onInputChange}
-              >
-                <MenuItem value="masculino">Masculino</MenuItem>
-                <MenuItem value="femenino">Femenino</MenuItem>
-                <MenuItem value="otro">Otro</MenuItem>
-              </TextField>
             </Grid>
             <Grid item xs={12}>
               <Alert severity="error" style={{ display: errorMessage ? 'block' : 'none', marginTop: '8px' }}>
@@ -137,7 +208,7 @@ export const RegisterPage = () => {
             </Grid>
             <Grid item xs={12}>
               <Button type="submit" variant="contained" fullWidth>
-                Registrarse
+                {isRegistering ? <CircularProgress size={24} /> : "Registrarse"}
               </Button>
             </Grid>
             <Grid item xs={12}>
@@ -156,4 +227,3 @@ export const RegisterPage = () => {
     </AuthLayout>
   );
 };
-
