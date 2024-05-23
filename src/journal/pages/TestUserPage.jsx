@@ -3,7 +3,8 @@ import { Box, Button, Grid, TextField, Typography, MenuItem, IconButton } from '
 import { Link as RouterLink } from 'react-router-dom';
 import { JournalLayout } from '../layout/JournalLayout';
 import { CalendarToday as CalendarIcon, School as SchoolIcon, Person as PersonIcon, Phone as PhoneIcon, Lock as LockIcon, Email as EmailIcon } from '@mui/icons-material';
-import { FirebaseAuth } from '../../firebase/config';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export const TestUserPage = () => {
     const [formData, setFormData] = useState({
@@ -20,19 +21,34 @@ export const TestUserPage = () => {
     const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
-        if (FirebaseAuth.currentUser) {
-            const user = FirebaseAuth.currentUser;
-            setFormData({
-                displayName: user.displayName || '',
-                email: user.email || '',
-                phone: '',
-                birthDate: '',
-                gender: '',
-                school: '',
-                password: '',
-                confirmPassword: '',
-            });
-        }
+        const fetchUserData = async () => {
+            try {
+                const token = Cookies.get('access_token');
+                if (!token) {
+                    throw new Error('Token no encontrado');
+                }
+
+                const userResponse = await axios.get(`https://4098-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
+                    headers: { "ngrok-skip-browser-warning": "69420" }
+                });
+
+                const user = userResponse.data.__data__;
+                setFormData({
+                    displayName: user.name || '',
+                    email: user.email || '',
+                    phone: user.telf || '',
+                    birthDate: user.birth_date || '',
+                    gender: user.gender || '',
+                    school: user.School || '',
+                    password: '',
+                    confirmPassword: '',
+                });
+            } catch (error) {
+                console.error('Error al obtener los datos del usuario:', error);
+            }
+        };
+
+        fetchUserData();
     }, []);
 
     const handleChange = (event) => {

@@ -1,4 +1,4 @@
-import { Box, Button, Typography, CircularProgress } from "@mui/material";
+import { Box, Button, Typography, CircularProgress, Fade } from "@mui/material";
 import { JournalLayout } from "../layout/JournalLayout";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -39,18 +39,24 @@ export const JournalPage = () => {
           encontrar la carrera universitaria ideal para ti.
         </Typography>
 
-        {isLoading ? (
-          <CircularProgress />
-        ) : (
-          <Button
-            component={Link}
-            to="/test"
-            variant="contained"
-            startIcon={<AssessmentIcon />}
-            sx={{ mt: 2 }}
-          >
-            Iniciar Test
-          </Button>
+        <Fade in={!isLoading} timeout={1000}>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 2 }}>
+            <Button
+              component={Link}
+              to="/test"
+              variant="contained"
+              startIcon={<AssessmentIcon />}
+            >
+              Iniciar Test
+            </Button>
+          </Box>
+          
+        </Fade>
+
+        {isLoading && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <CircularProgress />
+          </Box>
         )}
       </Box>
     </JournalLayout>

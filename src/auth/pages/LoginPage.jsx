@@ -1,12 +1,13 @@
-import { Box, Grid, Button, TextField, Typography, Link, IconButton, CircularProgress } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Box, Grid, Button, TextField, Typography, Link, IconButton, CircularProgress, Alert } from '@mui/material';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { Google as GoogleIcon, Email as EmailIcon, Lock as LockIcon } from '@mui/icons-material';
 import { AuthLayout } from '../layout/AuthLayout';
-import { startGoogleSignIn, startLoginWithEmailPassword } from '../../store/auth';
-import { useDispatch, useSelector } from 'react-redux';
-import { useMemo } from 'react';
-import { Alert } from '@mui/material';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 import { useForms } from '../../hooks';
+import { useDispatch } from 'react-redux';
+import { onLogin, onchecking } from '../../store/AutenApi/ApiSlice';
 
 const initialFormData = {
   email: '',
@@ -14,18 +15,51 @@ const initialFormData = {
 };
 
 export const LoginPage = () => {
-  const { status, errorMessage } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
   const { email, password, onInputChange } = useForms(initialFormData);
-  const isAuthenticating = useMemo(() => status === 'checking', [status]);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
-    dispatch(startLoginWithEmailPassword({ email, password }));
-  };
+    setIsAuthenticating(true);
+    dispatch(onchecking());
 
-  const onGoogleSignIn = () => {
-    dispatch(startGoogleSignIn());
+    try {
+      const formData = new URLSearchParams();
+      formData.append('grant_type', '');
+      formData.append('username', email);
+      formData.append('password', password);
+      formData.append('scope', '');
+      formData.append('client_id', '');
+      formData.append('client_secret', '');
+
+      const response = await axios.post('https://486c-177-230-73-82.ngrok-free.app/loginuser', formData, {
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      });
+      console.log(response);
+
+      // Guardar el token en una cookie
+      Cookies.set('access_token', response.data.access_token, { expires: 1 }); // 1 día de expiración
+
+      dispatch(onLogin({ dataAcess: response.data.access_token, tokenType: response.data.token_type }));
+      navigate('/inicio');
+
+    } catch (error) {
+      console.log({ error });
+      if (error.response && error.response.status === 401) {
+        setAuthError('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
+      } else {
+        console.error('Error al iniciar sesión:', error.message);
+        setAuthError('Error al iniciar sesión. Por favor, inténtalo de nuevo más tarde.');
+      }
+    } finally {
+      setIsAuthenticating(false);
+    }
   };
 
   return (
@@ -36,12 +70,12 @@ export const LoginPage = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          maxHeight: '90vh', 
+          maxHeight: '90vh',
           maxWidth: '400px',
-          mx: 'auto', 
-          my: 'auto', 
+          mx: 'auto',
+          my: 'auto',
           p: 2,
-          animation: 'fadeInUp 0.5s ease-in-out', // Animación de entrada
+          animation: 'fadeInUp 0.5s ease-in-out',
         }}
       >
         <Typography variant="h4" align="center" gutterBottom>
@@ -60,12 +94,12 @@ export const LoginPage = () => {
                 onChange={onInputChange}
                 InputProps={{
                   startAdornment: (
-                    <IconButton disabled={isAuthenticating}>
+                    <IconButton disabled={isAuthenticating} tabIndex={-1}>
                       <EmailIcon />
                     </IconButton>
                   ),
                 }}
-                sx={{ transition: 'border-color 0.3s ease-in-out' }} // Efecto visual en el campo de entrada
+                sx={{ transition: 'border-color 0.3s ease-in-out' }}
               />
             </Grid>
 
@@ -80,37 +114,24 @@ export const LoginPage = () => {
                 onChange={onInputChange}
                 InputProps={{
                   startAdornment: (
-                    <IconButton disabled={isAuthenticating}>
+                    <IconButton disabled={isAuthenticating} tabIndex={-1}>
                       <LockIcon />
                     </IconButton>
                   ),
                 }}
-                sx={{ transition: 'border-color 0.3s ease-in-out' }} // Efecto visual en el campo de entrada
+                sx={{ transition: 'border-color 0.3s ease-in-out' }}
               />
             </Grid>
 
             <Grid item xs={12}>
-              <Alert severity="error" style={{ display: errorMessage ? 'block' : 'none', marginTop: '8px' }}>
-                {errorMessage}
+              <Alert severity="error" style={{ display: authError ? 'block' : 'none', marginTop: '8px' }}>
+                {authError}
               </Alert>
             </Grid>
 
             <Grid item xs={12}>
               <Button disabled={isAuthenticating} type="submit" variant="contained" fullWidth>
                 {isAuthenticating ? <CircularProgress size={24} /> : "Iniciar Sesión"}
-              </Button>
-            </Grid>
-
-            <Grid item xs={12}>
-              <Button
-                disabled={isAuthenticating}
-                variant="contained"
-                fullWidth
-                onClick={onGoogleSignIn}
-                startIcon={<GoogleIcon />}
-                sx={{ transition: 'background-color 0.3s ease-in-out' }} // Efecto visual en el botón
-              >
-                Iniciar Sesión con Google
               </Button>
             </Grid>
 

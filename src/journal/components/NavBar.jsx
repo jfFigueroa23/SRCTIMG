@@ -3,13 +3,15 @@ import { useDispatch } from 'react-redux';
 import { startLogout } from '../../store/auth';
 import { Link as RouterLink } from 'react-router-dom'; 
 import { Home, LogoutOutlined, MenuOutlined } from '@mui/icons-material';
+import { onLogout } from '../../store/AutenApi/ApiSlice';
 
 export const NavBar = () => {
     const dispatch = useDispatch();
 
-    const onLogout = () => {
-        dispatch(startLogout());
+    const salir = () => {
+        dispatch(onLogout());
     }
+    
 
     return (
         <AppBar position='fixed'>
@@ -20,7 +22,7 @@ export const NavBar = () => {
 
                 <Grid container direction="row" justifyContent='space-between' alignItems='center'>
 
-                    <IconButton component={RouterLink} to="/inicio" color='icons' noWrap variant='h6'> 
+                    <IconButton component={RouterLink} to="/inicio" color='#000000' noWrap variant='h6'> 
                         <Home/> 
                     </IconButton>   
 
@@ -28,7 +30,11 @@ export const NavBar = () => {
                         Usuario
                     </Button>
 
-                    <IconButton onClick={onLogout} color='error'>
+                    <Button component={RouterLink} to="/ayuda" color='secondary' noWrap variant='h6'> 
+                        Acerca De
+                    </Button>
+
+                    <IconButton onClick={salir} color='error'>
                         <LogoutOutlined />
                     </IconButton>
                 </Grid>

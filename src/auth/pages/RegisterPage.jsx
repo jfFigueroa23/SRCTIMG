@@ -1,12 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Button, Grid, TextField, Typography, Link, IconButton, MenuItem, CircularProgress } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-import { Google as GoogleIcon, Email as EmailIcon, Lock as LockIcon, Phone as PhoneIcon, CalendarToday as CalendarIcon, School as SchoolIcon, Person as PersonIcon } from '@mui/icons-material'; // Importar PersonIcon
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Google as GoogleIcon, Email as EmailIcon, Lock as LockIcon, Phone as PhoneIcon, CalendarToday as CalendarIcon, School as SchoolIcon, Person as PersonIcon, Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from '@mui/icons-material';
 import { AuthLayout } from '../layout/AuthLayout';
-import { startGoogleSignIn, startCreatingUserWithEmailPassword } from '../../store/auth';
-import { useDispatch, useSelector } from 'react-redux';
-import { Alert } from '@mui/material';
 import { useForms } from '../../hooks';
+import Cookies from 'js-cookie';
 
 const initialFormData = {
   name: '',
@@ -20,10 +18,11 @@ const initialFormData = {
 };
 
 export const RegisterPage = () => {
-  const { errorMessage } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
   const [passwordError, setPasswordError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
 
   const { 
     name,
@@ -50,23 +49,56 @@ export const RegisterPage = () => {
     setPasswordError('');
     setIsRegistering(true);
 
-    // Dispatch de la acción de registro
-    await dispatch(startCreatingUserWithEmailPassword({ 
-      name,
-      phone,
-      email,
-      birthDate,
-      gender,
-      school,
-      password, 
-    }));
+    try {
+      // Enviar la solicitud a la API
+      const response = await fetch('https://486c-177-230-73-82.ngrok-free.app/students_f/create_students', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          telf: phone,
+          email,
+          birth_date: birthDate,
+          gender,
+          School: school,
+          password,
+        }),
+      });
 
-    // Restablecer el estado de registro
-    setIsRegistering(false);
+      if (!response.ok) {
+        throw new Error('Error en el registro');
+      }
+
+      // Parsear la respuesta
+      const data = await response.json();
+      const { token } = data;
+
+      // Almacenar el token en una cookie
+      Cookies.set('auth_token', token, { expires: 100 }); 
+
+      navigate('/inicio');
+
+      // Restablecer el estado de registro
+      setIsRegistering(false);
+    } catch (error) {
+      console.error('Error al registrar usuario:', error);
+      setIsRegistering(false);
+    }
   };
 
   const onGoogleSignIn = () => {
-    dispatch(startGoogleSignIn());
+    // Implementar lógica de registro con Google aquí si es necesario
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
@@ -99,7 +131,7 @@ export const RegisterPage = () => {
                 value={name}
                 onChange={onInputChange}
                 InputProps={{
-                  startAdornment: <IconButton><LockIcon /></IconButton>,
+                  startAdornment: <IconButton tabIndex={-1}> <PersonIcon /> </IconButton>,
                 }}
               />
             </Grid>
@@ -112,7 +144,7 @@ export const RegisterPage = () => {
                 value={phone}
                 onChange={onInputChange}
                 InputProps={{
-                  startAdornment: <IconButton><PhoneIcon /></IconButton>,
+                  startAdornment: <IconButton tabIndex={-1}> <PhoneIcon /></IconButton>,
                 }}
               />
             </Grid>
@@ -125,7 +157,7 @@ export const RegisterPage = () => {
                 value={email}
                 onChange={onInputChange}
                 InputProps={{
-                  startAdornment: <IconButton><EmailIcon /></IconButton>,
+                  startAdornment: <IconButton tabIndex={-1}> <EmailIcon /></IconButton>,
                 }}
               />
             </Grid>
@@ -138,7 +170,7 @@ export const RegisterPage = () => {
                 value={birthDate}
                 onChange={onInputChange}
                 InputProps={{
-                  startAdornment: <IconButton><CalendarIcon /></IconButton>,
+                  startAdornment: <IconButton tabIndex={-1}> <CalendarIcon /></IconButton>,
                 }}
                 InputLabelProps={{ shrink: true }}
               />
@@ -152,7 +184,7 @@ export const RegisterPage = () => {
                 value={gender}
                 onChange={onInputChange}
                 InputProps={{
-                  startAdornment: <IconButton><PersonIcon /></IconButton>, // Cambiar a PersonIcon
+                  startAdornment: <IconButton tabIndex={-1}> <PersonIcon /></IconButton>,
                 }}
               >
                 <MenuItem value="masculino">Masculino</MenuItem>
@@ -169,27 +201,27 @@ export const RegisterPage = () => {
                 value={school}
                 onChange={onInputChange}
                 InputProps={{
-                  startAdornment: <IconButton><SchoolIcon /></IconButton>,
+                  startAdornment: <IconButton  tabIndex={-1}> <SchoolIcon /></IconButton>,
                 }}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 label="Contraseña"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 fullWidth
                 name="password"
                 value={password}
                 onChange={onInputChange}
                 InputProps={{
-                  startAdornment: <IconButton><LockIcon /></IconButton>,
+                  startAdornment: <IconButton tabIndex={-1} onClick={toggleShowPassword}> {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}</IconButton>,
                 }}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 label="Confirmar contraseña"
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 fullWidth
                 name="confirmPassword"
                 value={confirmPassword}
@@ -197,14 +229,9 @@ export const RegisterPage = () => {
                 error={passwordError !== ''}
                 helperText={passwordError}
                 InputProps={{
-                  startAdornment: <IconButton><LockIcon /></IconButton>,
+                  startAdornment: <IconButton tabIndex={-1} onClick={toggleShowConfirmPassword}> {showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}</IconButton>,
                 }}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <Alert severity="error" style={{ display: errorMessage ? 'block' : 'none', marginTop: '8px' }}>
-                {errorMessage}
-              </Alert>
             </Grid>
             <Grid item xs={12}>
               <Button type="submit" variant="contained" fullWidth>
@@ -212,7 +239,7 @@ export const RegisterPage = () => {
               </Button>
             </Grid>
             <Grid item xs={12}>
-              <Button variant="contained" fullWidth onClick={onGoogleSignIn} startIcon={<GoogleIcon />}>
+              <Button variant="contained" fullWidth onClick={onGoogleSignIn} startIcon={<GoogleIcon />} tabIndex={-1}>
                 Registrarse con Google
               </Button>
             </Grid>

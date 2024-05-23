@@ -5,7 +5,7 @@ import { TestPageDos } from "../pages/TestPageDos"
 import { TestFinalPage } from "../pages/TestFinalPage"
 import { TestUserPage} from "../pages/TestUserPage"
 import { TestPageTres } from "../pages/TestPageTres"
-
+import { AyudaPage } from "../pages/AyudaPage"
 
 export const JournalRautes = () => {
   return (
@@ -16,6 +16,7 @@ export const JournalRautes = () => {
         <Route path="/testtres" element={ <TestPageTres />} />
         <Route path="/testfinal" element={ <TestFinalPage/>} />
         <Route path="/testuser" element={ <TestUserPage/>} />
+        <Route path="/ayuda" element={ <AyudaPage/>} />
         <Route path="/*" element={ <Navigate to="/inicio"/>}/>
     </Routes>
   )
