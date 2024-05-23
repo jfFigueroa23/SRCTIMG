@@ -14,7 +14,7 @@ export const pagefunciones = {
       });
 
       // Verifica la estructura completa de la respuesta
-      console.log('Respuesta completa de la API del usuario:', userResponse.data);
+      console.log('Respuesta completa de la API del usuario:', userResponse.data);  
 
       const userId = userResponse.data.__data__.id_students;
       if (!userId) {
@@ -25,12 +25,14 @@ export const pagefunciones = {
 
       // Verificar la estructura de formattedResponses antes de enviar
       console.log('Datos formateados para enviar:', formattedResponses);
-      
+
       // URL completa con parámetros
-      const url = `https://486c-177-230-73-82.ngrok-free.app/response_f/getuserrespone?id_student=${userId}`;
+      const url = `https://486c-177-230-73-82.ngrok-free.app/response_f/getuserrespone/${userId}`;
+      
+      
       console.log('URL para la solicitud POST:', url);
 
-      await axios.post(url, { list: formattedResponses }, { headers: { 'Content-Type': 'application/json' } });
+      await axios.post(url, { list: formattedResponses }, { headers: { "ngrok-skip-browser-warning": "69420", 'Content-Type': 'application/json' } });
 
       console.log('Datos guardados exitosamente en el backend');
 

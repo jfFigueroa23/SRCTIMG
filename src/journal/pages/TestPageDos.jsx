@@ -102,7 +102,7 @@ export const TestPageDos = () => {
           <Box mt={3} textAlign="center">
             <Link to="/testtres" style={{ textDecoration: "none" }}>
               <Button variant="contained" disabled={!isResponsesComplete()} onClick={handleSaveData}>
-                Guardar
+                Siguiente
               </Button>
             </Link>
           </Box>

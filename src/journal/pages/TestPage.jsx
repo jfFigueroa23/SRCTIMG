@@ -105,7 +105,7 @@ export const TestPage = () => {
                 disabled={!isResponsesComplete()} 
                 onClick={handleSaveData}
               >
-                Guardar
+                Siguiente
               </Button>
             </Link>
           </Box>
