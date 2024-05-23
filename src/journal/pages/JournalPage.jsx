@@ -8,7 +8,6 @@ import Cookies from 'js-cookie';
 
 export const JournalPage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [hasCompletedTest, setHasCompletedTest] = useState(false);
   const [hasResults, setHasResults] = useState(false);
   const [userId, setUserId] = useState('');
 
@@ -21,7 +20,7 @@ export const JournalPage = () => {
         }
 
         // Fetch current user data
-        const userResponse = await axios.get(`https://486c-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
+        const userResponse = await axios.get(`https://c4f5-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
           headers: { "ngrok-skip-browser-warning": "69420" }
         });
 
@@ -29,20 +28,8 @@ export const JournalPage = () => {
         setUserId(user.id_students);
         console.log('User ID:', user.id_students);
 
-        // Fetch test completion status
-        const testStatusResponse = await axios.get(`https://486c-177-230-73-82.ngrok-free.app/students_f/get_student/${user.id_students}`, {
-          headers: { 
-            "ngrok-skip-browser-warning": "69420",
-            "Authorization": `Bearer ${token}`
-          }
-        });
-
-        const testStatusData = testStatusResponse.data; // Obtener los datos de la respuesta
-        setHasCompletedTest(testStatusData.has_completed_test); // Establecer hasCompletedTest
-        console.log('Has Completed Test:', testStatusData.has_completed_test);
-
         // Fetch results status
-        const resultsStatusResponse = await axios.get(`https://486c-177-230-73-82.ngrok-free.app/results_f/sendresultsclient?id_student=${user.id_students}`, {
+        const resultsStatusResponse = await axios.get(`https://c4f5-177-230-73-82.ngrok-free.app/results_f/check_results/?id_student=${user.id_students}`, {
           headers: { 
             "ngrok-skip-browser-warning": "69420",
             "Authorization": `Bearer ${token}`,
@@ -50,11 +37,13 @@ export const JournalPage = () => {
           }
         });
 
-        const resultsStatusData = resultsStatusResponse.data; // Obtener los datos de la respuesta
-        setHasResults(resultsStatusData.has_results); // Establecer hasResults
-        console.log('Has Results:', resultsStatusData.has_results);
+        const resultsStatusData = resultsStatusResponse.data;
+        if (resultsStatusData.message === "The student has already answer the test") {
+          setHasResults(true);
+        }
+        console.log('Results Message:', resultsStatusData.message);
       } catch (error) {
-        console.error('Error al obtener los datos del usuario o verificar el estado del test y los resultados:', error);
+        console.error('Error al obtener los datos del usuario o verificar el estado de los resultados:', error);
       } finally {
         setIsLoading(false);
       }
@@ -76,7 +65,6 @@ export const JournalPage = () => {
           mx: "auto",
           my: "auto",
           p: 2,
-          animation: "fadeInUp 0.5s ease-in-out",
         }}
       >
         <Typography variant="h4" align="center" gutterBottom>
@@ -88,33 +76,43 @@ export const JournalPage = () => {
         </Typography>
 
         <Fade in={!isLoading} timeout={1000}>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>
             {hasResults ? (
               <Button
                 component={Link}
-                to={`/resultados/${userId}`}
+                to={`/test
+                `}
                 variant="contained"
+                color="primary"
+                size="large"
                 startIcon={<AssessmentIcon />}
+                sx={{ mb: 2 }}
               >
-                Ver Resultados
-              </Button>
-            ) : hasCompletedTest ? (
-              <Button
-                component={Link}
-                to="/testfinal"
-                variant="contained"
-                startIcon={<AssessmentIcon />}
-              >
-                Rehacer Test
+                INICIAR TEST
               </Button>
             ) : (
               <Button
                 component={Link}
-                to="/test"
+                to="/testfinal"
                 variant="contained"
+                color="primary"
+                size="large"
+                startIcon={<AssessmentIcon />}
+                sx={{ mb: 2 }}
+              >
+                INICIAR TEST
+              </Button>
+            )}
+            {hasResults && (
+              <Button
+                component={Link}
+                to="/testfinal"
+                variant="contained"
+                color="secondary"
+                size="large"
                 startIcon={<AssessmentIcon />}
               >
-                Iniciar Test
+                VER RESULTADOS
               </Button>
             )}
           </Box>

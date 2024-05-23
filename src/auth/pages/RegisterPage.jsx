@@ -51,7 +51,7 @@ export const RegisterPage = () => {
 
     try {
       // Enviar la solicitud a la API
-      const response = await fetch('https://486c-177-230-73-82.ngrok-free.app/students_f/create_students', {
+      const response = await fetch('https://c4f5-177-230-73-82.ngrok-free.app/students_f/create_students', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',

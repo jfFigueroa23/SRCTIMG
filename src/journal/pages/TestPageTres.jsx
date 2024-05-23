@@ -14,7 +14,7 @@ export const TestPageTres = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    axios.get('https://486c-177-230-73-82.ngrok-free.app/questions_f/get_all_questions/', {
+    axios.get('https://c4f5-177-230-73-82.ngrok-free.app/questions_f/get_all_questions/', {
       headers: {
         "ngrok-skip-browser-warning": "69420",
       }

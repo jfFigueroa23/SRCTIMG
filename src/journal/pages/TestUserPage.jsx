@@ -31,7 +31,7 @@ export const TestUserPage = () => {
                     throw new Error('Token no encontrado');
                 }
         
-                const userResponse = await axios.get(`https://486c-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
+                const userResponse = await axios.get(`https://c4f5-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
                     headers: { "ngrok-skip-browser-warning": "69420" }
                 });
         
@@ -43,45 +43,13 @@ export const TestUserPage = () => {
                     birthDate: user.birth_date || '',
                     gender: user.gender || '',
                     school: user.School || '',
-                    password: '',
-                    confirmPassword: '',
+                    password: user.password || '..........',
+                    confirmPassword: user.password || '..........',
                 });
         
                 setUserId(user.id_students); // Aquí se guarda el userId obtenido de la respuesta
             } catch (error) {
                 console.error('Error al obtener los datos del usuario:', error);
-            }
-        };
-        
-        const handleSubmit = async (event) => {
-            event.preventDefault();
-            setIsEditing(false);
-            
-            try {
-                const token = Cookies.get('access_token');
-                if (!token) {
-                    throw new Error('Token no encontrado');
-                }
-        
-                const response = await axios.patch(`https://486c-177-230-73-82.ngrok-free.app/students_f/upd_students/${userId}`, formData, {
-                    headers: { 
-                        "ngrok-skip-browser-warning": "69420",
-                        "Content-Type": "application/json",
-                        "accept": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-        
-                if (response.status === 200) {
-                    setSnackbarMessage('Datos actualizados exitosamente');
-                    setSnackbarOpen(true);
-                } else {
-                    throw new Error('Error al actualizar los datos');
-                }
-            } catch (error) {
-                console.error('Error al enviar la solicitud PATCH:', error);
-                setSnackbarMessage('Error al actualizar los datos');
-                setSnackbarOpen(true);
             }
         };
         
@@ -106,7 +74,20 @@ export const TestUserPage = () => {
                 throw new Error('Token no encontrado');
             }
 
-            const response = await axios.patch(`https://486c-177-230-73-82.ngrok-free.app/students_f/upd_students/${userId}?id_students`, formData, {
+            // Creación del payload para la solicitud PATCH con todos los campos
+            const payload = {
+                name: formData.displayName,
+                telf: formData.phone,
+                email: formData.email,
+                birth_date: formData.birthDate,
+                gender: formData.gender,
+                School: formData.school,
+                password: formData.password
+            };
+
+            console.log('Datos enviados a la API:', payload); // Aquí se muestra en la consola lo que se envía a la API
+
+            const response = await axios.patch(`https://c4f5-177-230-73-82.ngrok-free.app/students_f/upd_students/${userId}?id_students=${userId}`, payload, {
                 headers: { 
                     "ngrok-skip-browser-warning": "69420",
                     "Content-Type": "application/json",
@@ -265,7 +246,7 @@ export const TestUserPage = () => {
                                 <Grid item xs={12}>
                                     <TextField
                                         label="Contraseña"
-                                        type ="password"
+                                        type="password"
                                         variant="outlined"
                                         fullWidth
                                         name="password"
