@@ -21,6 +21,8 @@ export const pagefunciones = {
         throw new Error('userId no encontrado en la respuesta de la API');
       }
 
+      
+
       const formattedResponses = formatResponses(responses);
 
       // Verificar la estructura de formattedResponses antes de enviar

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Box, Button, Grid, TextField, Typography, MenuItem, IconButton } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, Grid, TextField, Typography, MenuItem, IconButton, Snackbar } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { JournalLayout } from '../layout/JournalLayout';
 import { CalendarToday as CalendarIcon, School as SchoolIcon, Person as PersonIcon, Phone as PhoneIcon, Lock as LockIcon, Email as EmailIcon } from '@mui/icons-material';
@@ -19,6 +19,9 @@ export const TestUserPage = () => {
     });
 
     const [isEditing, setIsEditing] = useState(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [userId, setUserId] = useState('');
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -27,11 +30,11 @@ export const TestUserPage = () => {
                 if (!token) {
                     throw new Error('Token no encontrado');
                 }
-
-                const userResponse = await axios.get(`https://4098-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
+        
+                const userResponse = await axios.get(`https://486c-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
                     headers: { "ngrok-skip-browser-warning": "69420" }
                 });
-
+        
                 const user = userResponse.data.__data__;
                 setFormData({
                     displayName: user.name || '',
@@ -43,11 +46,45 @@ export const TestUserPage = () => {
                     password: '',
                     confirmPassword: '',
                 });
+        
+                setUserId(user.id_students); // Aquí se guarda el userId obtenido de la respuesta
             } catch (error) {
                 console.error('Error al obtener los datos del usuario:', error);
             }
         };
-
+        
+        const handleSubmit = async (event) => {
+            event.preventDefault();
+            setIsEditing(false);
+            
+            try {
+                const token = Cookies.get('access_token');
+                if (!token) {
+                    throw new Error('Token no encontrado');
+                }
+        
+                const response = await axios.patch(`https://486c-177-230-73-82.ngrok-free.app/students_f/upd_students/${userId}`, formData, {
+                    headers: { 
+                        "ngrok-skip-browser-warning": "69420",
+                        "Content-Type": "application/json",
+                        "accept": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+        
+                if (response.status === 200) {
+                    setSnackbarMessage('Datos actualizados exitosamente');
+                    setSnackbarOpen(true);
+                } else {
+                    throw new Error('Error al actualizar los datos');
+                }
+            } catch (error) {
+                console.error('Error al enviar la solicitud PATCH:', error);
+                setSnackbarMessage('Error al actualizar los datos');
+                setSnackbarOpen(true);
+            }
+        };
+        
         fetchUserData();
     }, []);
 
@@ -59,9 +96,36 @@ export const TestUserPage = () => {
         }));
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         setIsEditing(false);
+        
+        try {
+            const token = Cookies.get('access_token');
+            if (!token) {
+                throw new Error('Token no encontrado');
+            }
+
+            const response = await axios.patch(`https://486c-177-230-73-82.ngrok-free.app/students_f/upd_students/${userId}?id_students`, formData, {
+                headers: { 
+                    "ngrok-skip-browser-warning": "69420",
+                    "Content-Type": "application/json",
+                    "accept": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 200) {
+                setSnackbarMessage('Datos actualizados exitosamente');
+                setSnackbarOpen(true);
+            } else {
+                throw new Error('Error al actualizar los datos');
+            }
+        } catch (error) {
+            console.error('Error al enviar la solicitud PATCH:', error);
+            setSnackbarMessage('Error al actualizar los datos');
+            setSnackbarOpen(true);
+        }
     };
 
     const handleEditClick = () => {
@@ -70,6 +134,10 @@ export const TestUserPage = () => {
 
     const handleCancelClick = () => {
         setIsEditing(false);
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     return (
@@ -197,7 +265,7 @@ export const TestUserPage = () => {
                                 <Grid item xs={12}>
                                     <TextField
                                         label="Contraseña"
-                                        type="password"
+                                        type ="password"
                                         variant="outlined"
                                         fullWidth
                                         name="password"
@@ -254,6 +322,13 @@ export const TestUserPage = () => {
                     </Grid>
                 </form>
             </Box>
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                message={snackbarMessage}
+            />
         </JournalLayout>
     );
 };

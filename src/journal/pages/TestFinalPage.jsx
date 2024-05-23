@@ -1,136 +1,112 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Typography, Container, List, ListItem, ListItemText, Paper, Grow, Divider } from "@mui/material";
+import { Box, Typography, Container, List, ListItem, ListItemText, Paper, Divider } from "@mui/material";
 import { JournalLayout } from "../layout/JournalLayout";
-import { PieChart, Pie, Tooltip, Legend, Cell } from "recharts";
-import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
-const generateRandomResults = () => {
-  return {
-    "Inteligencia Física": Math.floor(Math.random() * 101),
-    "Inteligencia Emocional": Math.floor(Math.random() * 101),
-    "Inteligencia Lógico-Matemática": Math.floor(Math.random() * 101),
-    "Inteligencia Lingüística": Math.floor(Math.random() * 101),
-    "Inteligencia Espacial": Math.floor(Math.random() * 101),
-    "Inteligencia Musical": Math.floor(Math.random() * 101),
-    "Inteligencia Intrapersonal": Math.floor(Math.random() * 101),
-    "Inteligencia Interpersonal": Math.floor(Math.random() * 101),
-    "Inteligencia Naturalista": Math.floor(Math.random() * 101),
-  };
-};
-
-const careersByIntelligence = {
-  "Inteligencia Física": ["Educación física", "Kinesiología", "Terapia física"],
-  "Inteligencia Emocional": ["Psicología", "Trabajo social", "Consejería"],
-  "Inteligencia Lógico-Matemática": ["Matemáticas", "Ingeniería", "Ciencias de la computación"],
-  "Inteligencia Lingüística": ["Lenguas extranjeras", "Lingüística", "Comunicación"],
-  "Inteligencia Espacial": ["Arquitectura", "Diseño gráfico", "Fotografía"],
-  "Inteligencia Musical": ["Música", "Producción musical", "Composición"],
-  "Inteligencia Intrapersonal": ["Filosofía", "Teología", "Medicina"],
-  "Inteligencia Interpersonal": ["Pedagogía", "Liderazgo organizacional", "Trabajo en equipo"],
-  "Inteligencia Naturalista": ["Biología", "Ecología", "Ciencias ambientales"],
+// Función para eliminar resultados duplicados
+const removeDuplicates = (arr) => {
+  const uniqueResults = [];
+  const seen = new Set();
+  arr.forEach((result) => {
+    const serializedResult = JSON.stringify(result);
+    if (!seen.has(serializedResult)) {
+      seen.add(serializedResult);
+      uniqueResults.push(result);
+    }
+  });
+  return uniqueResults;
 };
 
 export const TestFinalPage = () => {
-  const [results, setResults] = useState(null);
-  const [canSaveResults, setCanSaveResults] = useState(false);
-  const [showSaveAlert, setShowSaveAlert] = useState(false);
-  const location = useLocation();
-  const responses = location.state?.responses || {};
+  const [results, setResults] = useState([]);
 
   useEffect(() => {
-    const calculatedResults = generateRandomResults();
-    setResults(calculatedResults);
-    setCanSaveResults(true);
+    const fetchResults = async () => {
+      try {
+        const token = Cookies.get('access_token');
+        if (!token) {
+          throw new Error('Token no encontrado');
+        }
+
+        const userResponse = await axios.get(`https://486c-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
+          headers: { "ngrok-skip-browser-warning": "69420" }
+        });
+
+        const userId = userResponse.data.__data__.id_students;
+        if (!userId) {
+          throw new Error('userId no encontrado en la respuesta de la API');
+        }
+
+        const response = await axios.get(`https://486c-177-230-73-82.ngrok-free.app/results_f/sendresultsclient/?id_student=${userId}`, {
+          headers: { 'accept': 'application/json', "ngrok-skip-browser-warning": "69420" }
+        });
+
+        // Maneja diferentes casos de respuesta aquí
+        if (!Array.isArray(response.data)) {
+          throw new Error('La respuesta no es un array');
+        }
+
+        const parsedResults = response.data.map((item) => {
+          try {
+            return JSON.parse(item);
+          } catch (error) {
+            console.error('Error al parsear el objeto JSON:', error);
+            return null;
+          }
+        }).filter((item) => item !== null);
+
+        // Filtra los resultados para evitar repeticiones
+        const uniqueResults = removeDuplicates(parsedResults);
+
+        // Ordena los resultados de mayor a menor
+        const sortedResults = uniqueResults.sort((a, b) => {
+          const aTotal = Object.values(a).flat().length;
+          const bTotal = Object.values(b).flat().length;
+          return bTotal - aTotal;
+        });
+
+        setResults(sortedResults);
+      } catch (error) {
+        console.error("Error al obtener los resultados:", error);
+      }
+    };
+
+    fetchResults();
   }, []);
-
-  const handleSaveResults = () => {
-    if (results) {
-      console.log("Guardando resultados:", results);
-      setShowSaveAlert(true);
-    }
-  };
-
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF", "#FF6A00", "#FF2400", "#009E73", "#964B00"];
 
   return (
     <JournalLayout>
       <Container maxWidth="md">
-        <Paper elevation={3} sx={{ padding: 3, marginBottom: 4 }}>
-          <Typography variant="h4" gutterBottom>
-            Resultados del Test de Inteligencias Múltiples
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            Aquí se muestran los resultados de las inteligencias múltiples y las carreras universitarias asociadas a cada inteligencia.
-          </Typography>
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Grow in={canSaveResults}>
-              <Button variant="contained" onClick={handleSaveResults} disabled={!canSaveResults}>
-                Guardar Resultados
-              </Button>
-            </Grow>
-          </Box>
-          {showSaveAlert && (
-            <Typography variant="body1" sx={{ mt: 2 }} color="success">
-              ¡Los resultados han sido guardados!
-            </Typography>
-          )}
-        </Paper>
-        {results && (
-          <Box>
-            <Paper elevation={3} sx={{ padding: 3, marginBottom: 4 }}>
-              <Typography variant="h5" gutterBottom>
-                Resultados de inteligencias múltiples:
+        {results.map((result, index) => (
+          <Box key={index} sx={{ marginBottom: 4 }}>
+            <Paper elevation={3} sx={{ padding: 3, borderRadius: '20px', boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)' }}>
+              <Typography variant="h4" align="center" sx={{ color: '#4CAF50', fontWeight: 'bold', marginBottom: 2 }}>
+                Resultados del Test de Inteligencias Múltiples
               </Typography>
-              <PieChart width={500} height={300}>
-                <Pie
-                  data={Object.keys(results).map((intelligence) => ({
-                    name: intelligence,
-                    value: results[intelligence],
-                  }))}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                >
-                  {
-                    Object.keys(results).map((intelligence, index) => (
-                      <Cell key={intelligence} fill={COLORS[index % COLORS.length]} />
-                    ))
-                  }
-                </Pie>
-                <Tooltip />
-                <Legend iconSize={10} layout="vertical" align="left" verticalAlign="middle" />
-              </PieChart>
-            </Paper>
-            <Paper elevation={3} sx={{ padding: 3, marginBottom: 4 }}>
-              <Typography variant="h5" gutterBottom>
-                Carreras universitarias asociadas:
-              </Typography>
-              {Object.entries(results)
-                .sort(([, a], [, b]) => b - a)
-                .map(([intelligence, percentage]) => (
-                  <Box key={intelligence} sx={{ marginBottom: 3 }}>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Typography variant="h6" gutterBottom>{intelligence} ({percentage}%):</Typography>
-                    </motion.div>
-                    <Divider />
-                    <List>
-                      {careersByIntelligence[intelligence].map((career) => (
-                        <motion.div key={career} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                          <ListItem>
-                            <ListItemText primary={career} />
-                          </ListItem>
-                        </motion.div>
-                      ))}
-                    </List>
-                  </Box>
-                ))}
+              {Object.entries(result).map(([intelligence, careers], intelligenceIndex) => (
+                <Box key={intelligenceIndex} sx={{ marginBottom: 3 }}>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Typography variant="h5" align="center" sx={{ color: '#2196F3', fontWeight: 'bold', marginBottom: 1 }}>
+                      {intelligenceIndex === 0 ? "🥇" : intelligenceIndex === 1 ? "🥈" : intelligenceIndex === 2 ? "🥉" : null} {intelligence}:
+                    </Typography>
+                  </motion.div>
+                  <Divider sx={{ backgroundColor: '#2196F3' }} />
+                  <List>
+                    {careers.map((career, careerIndex) => (
+                      <motion.div key={careerIndex} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <ListItem sx={{ paddingLeft: 0 }}>
+                          <ListItemText primary={career.Career} sx={{ color: '#333' }} />
+                        </ListItem>
+                      </motion.div>
+                    ))}
+                  </List>
+                </Box>
+              ))}
             </Paper>
           </Box>
-        )}
+        ))}
       </Container>
     </JournalLayout>
   );

@@ -3,6 +3,7 @@ import { Box, Typography, Container, Slider, Button } from "@mui/material";
 import { JournalLayout } from "../layout/JournalLayout";
 import axios from 'axios';
 import { pagefunciones } from "../functions/index";
+import { Link } from "react-router-dom";
 
 export const TestPageTres = () => {
   const [questions, setQuestions] = useState([]);
@@ -115,9 +116,11 @@ export const TestPageTres = () => {
             </Box>
           ))}
           <Box mt={3} textAlign="center">
+          <Link to="/testfinal" style={{ textDecoration: "none" }}>
             <Button variant="contained" disabled={!isResponsesComplete() || isSaving} onClick={handleSaveData}>
               {isSaving ? 'Guardando...' : 'Finalizar'}
             </Button>
+            </Link>
           </Box>
         </Box>
       </Container>

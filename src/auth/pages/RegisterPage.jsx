@@ -238,11 +238,6 @@ export const RegisterPage = () => {
                 {isRegistering ? <CircularProgress size={24} /> : "Registrarse"}
               </Button>
             </Grid>
-            <Grid item xs={12}>
-              <Button variant="contained" fullWidth onClick={onGoogleSignIn} startIcon={<GoogleIcon />} tabIndex={-1}>
-                Registrarse con Google
-              </Button>
-            </Grid>
             <Grid item xs={12} sx={{ textAlign: 'center' }}>
               <Link component={RouterLink} color="inherit" to="/auth/login">
                 ¿Ya tienes una cuenta? Inicia sesión aquí
