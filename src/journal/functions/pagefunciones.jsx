@@ -9,11 +9,10 @@ export const pagefunciones = {
         throw new Error('Token no encontrado');
       }
 
-      const userResponse = await axios.get(`https://c4f5-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
+      const userResponse = await axios.get(`https://dfbb-177-230-65-177.ngrok-free.app/get_current_user?token=${token}`, {
         headers: { "ngrok-skip-browser-warning": "69420" }
       });
 
-      // Verifica la estructura completa de la respuesta
       console.log('Respuesta completa de la API del usuario:', userResponse.data);  
 
       const userId = userResponse.data.__data__.id_students;
@@ -25,11 +24,9 @@ export const pagefunciones = {
 
       const formattedResponses = formatResponses(responses);
 
-      // Verificar la estructura de formattedResponses antes de enviar
       console.log('Datos formateados para enviar:', formattedResponses);
 
-      // URL completa con parámetros
-      const url = `https://c4f5-177-230-73-82.ngrok-free.app/response_f/getuserrespone/${userId}`;
+      const url = `https://dfbb-177-230-65-177.ngrok-free.app/response_f/getuserrespone/${userId}`;
       
       
       console.log('URL para la solicitud POST:', url);

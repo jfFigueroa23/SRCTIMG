@@ -10,6 +10,7 @@ export const JournalPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasResults, setHasResults] = useState(false);
   const [userId, setUserId] = useState('');
+  const [userName, setUserName] = useState(''); 
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -19,17 +20,17 @@ export const JournalPage = () => {
           throw new Error('Token no encontrado');
         }
 
-        // Fetch current user data
-        const userResponse = await axios.get(`https://c4f5-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
+        const userResponse = await axios.get(`https://d72b-2806-2f0-21c0-ff5a-51cb-d6be-3ad9-b539.ngrok-free.app/token=${token}`, {
           headers: { "ngrok-skip-browser-warning": "69420" }
         });
 
         const user = userResponse.data.__data__;
         setUserId(user.id_students);
+        setUserName(user.name); 
         console.log('User ID:', user.id_students);
 
-        // Fetch results status
-        const resultsStatusResponse = await axios.get(`https://c4f5-177-230-73-82.ngrok-free.app/results_f/check_results/?id_student=${user.id_students}`, {
+      
+        const resultsStatusResponse = await axios.get(`https://dfbb-177-230-65-177.ngrok-free.app/results_f/check_results/?id_student=${user.id_students}`, {
           headers: { 
             "ngrok-skip-browser-warning": "69420",
             "Authorization": `Bearer ${token}`,
@@ -68,6 +69,9 @@ export const JournalPage = () => {
         }}
       >
         <Typography variant="h4" align="center" gutterBottom>
+          Hola, {userName}!
+        </Typography>
+        <Typography variant="h4" align="center" gutterBottom>
           ¡Bienvenido al Test de Múltiples Inteligencias!
         </Typography>
         <Typography variant="body1" align="center" gutterBottom>
@@ -80,8 +84,7 @@ export const JournalPage = () => {
             {hasResults ? (
               <Button
                 component={Link}
-                to={`/test
-                `}
+                to={`/test`}
                 variant="contained"
                 color="primary"
                 size="large"
@@ -93,7 +96,7 @@ export const JournalPage = () => {
             ) : (
               <Button
                 component={Link}
-                to="/testfinal"
+                to="/test"
                 variant="contained"
                 color="primary"
                 size="large"
@@ -115,6 +118,30 @@ export const JournalPage = () => {
                 VER RESULTADOS
               </Button>
             )}
+            <Button
+              component="a"
+              href="https://forms.gle/t59ec9tAD3f7QSx49"
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="contained"
+              color="info"
+              size="large"
+              sx={{ mt: 2 }}
+            >
+              Botón SUS
+            </Button>
+            <Button
+              component="a"
+              href="https://forms.gle/Myqri1UAnwLyVXmc8"
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="contained"
+              color="success"
+              size="large"
+              sx={{ mt: 2 }}
+            >
+              Botón SUM
+            </Button>
           </Box>
         </Fade>
 

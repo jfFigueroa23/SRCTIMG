@@ -1,6 +1,5 @@
-// TestPageDos.js
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Container, Slider, Button } from "@mui/material";
+import { Box, Typography, Container, Button } from "@mui/material";
 import { JournalLayout } from "../layout/JournalLayout";
 import { Link } from "react-router-dom";
 import axios from 'axios';
@@ -13,14 +12,14 @@ export const TestPageDos = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    axios.get('https://c4f5-177-230-73-82.ngrok-free.app/questions_f/get_all_questions/', {
+    axios.get('https://dfbb-177-230-65-177.ngrok-free.app/questions_f/get_all_questions/', {
       headers: {
         "ngrok-skip-browser-warning": "69420",
       }
     })
     .then(response => {
       if (Array.isArray(response.data)) {
-        setQuestions(response.data.slice(9, 19)); 
+        setQuestions(response.data.slice(9, 18)); 
       } else {
         console.error('API NO FUNCIONA:', response.data);
         setError('Error: la respuesta de la API no es válida.');
@@ -32,10 +31,10 @@ export const TestPageDos = () => {
     });
   }, []);
 
-  const handleSliderChange = (key, value) => {
+  const handleResponseSelect = (questionId, value) => {
     setResponses(prevResponses => ({
       ...prevResponses,
-      [key]: value
+      [questionId]: value
     }));
   };
 
@@ -74,12 +73,9 @@ export const TestPageDos = () => {
           </Typography>
           <Typography variant="body1" gutterBottom>
             Por favor, responda las siguientes preguntas seleccionando el número que mejor describe su opinión.
+            TOMA EN CUENTA QUE 1 ES EL MAXIMO Y 9 ES EL MINIMO... 
+
           </Typography>
-          <Box sx={{ border: "1px solid #ccc", borderRadius: "8px", p: 2, mt: 2 }}>
-            <Typography variant="body2" gutterBottom>
-              Su puntuación se utilizará para determinar su perfil de inteligencias múltiples. Un valor de 9 indica un nivel bajo, mientras que un valor de 1 indica un nivel alto.
-            </Typography>
-          </Box>
         </Box>
         <Box sx={{ textAlign: "left" }}>
           {questions.map((question, index) => (
@@ -87,21 +83,27 @@ export const TestPageDos = () => {
               <Typography variant="h6" gutterBottom>
                 Pregunta {index + 10}: {question.content}
               </Typography>
-              <Slider
-                defaultValue={5}
-                aria-labelledby={`discrete-slider-${question.id_question}`}
-                valueLabelDisplay="auto"
-                step={1}
-                marks={[{ value: 1, label: '1' }, { value: 5, label: '5' }, { value: 9, label: '9' }]}
-                min={1}
-                max={9}
-                onChange={(e, value) => handleSliderChange(question.id_question, value)}
-              />
+              <Box display="flex" justifyContent="center" mt={2}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(option => (
+                  <Button
+                    key={option}
+                    variant={responses[question.id_question] === option ? "contained" : "outlined"}
+                    onClick={() => handleResponseSelect(question.id_question, option)}
+                    sx={{ mx: 1 }}
+                  >
+                    {option}
+                  </Button>
+                ))}
+              </Box>
             </Box>
           ))}
           <Box mt={3} textAlign="center">
             <Link to="/testtres" style={{ textDecoration: "none" }}>
-              <Button variant="contained" disabled={!isResponsesComplete()} onClick={handleSaveData}>
+              <Button 
+                variant="contained" 
+                disabled={!isResponsesComplete()} 
+                onClick={handleSaveData}
+              >
                 Siguiente
               </Button>
             </Link>

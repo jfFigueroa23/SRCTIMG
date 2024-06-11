@@ -18,7 +18,7 @@ const initialFormData = {
 };
 
 export const RegisterPage = () => {
-  const [passwordError, setPasswordError] = useState('');
+  const [errors, setErrors] = useState({});
   const [isRegistering, setIsRegistering] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -36,22 +36,24 @@ export const RegisterPage = () => {
     onInputChange 
   } = useForms(initialFormData);
 
+  const validate = () => {
+    let tempErrors = {};
+    tempErrors.name = name ? '' : 'El nombre es requerido';
+    tempErrors.phone = phone.length === 10 ? '' : 'El teléfono debe tener 10 dígitos';
+    tempErrors.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? '' : 'Email no válido';
+    tempErrors.password = password.length >= 6 ? '' : 'La contraseña debe tener al menos 6 caracteres';
+    tempErrors.confirmPassword = password === confirmPassword ? '' : 'Las contraseñas no coinciden';
+    setErrors(tempErrors);
+    return Object.values(tempErrors).every(x => x === '');
+  };
+
   const onSubmit = async (event) => {
     event.preventDefault();
-    
-    // Validar si las contraseñas coinciden
-    if (password !== confirmPassword) {
-      setPasswordError('Las contraseñas no coinciden');
-      return;
-    }
+    if (!validate()) return;
 
-    // Resetear el mensaje de error y establecer el estado de registro
-    setPasswordError('');
     setIsRegistering(true);
-
     try {
-      // Enviar la solicitud a la API
-      const response = await fetch('https://c4f5-177-230-73-82.ngrok-free.app/students_f/create_students', {
+      const response = await fetch('https://dfbb-177-230-65-177.ngrok-free.app/students_f/create_students', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -72,25 +74,15 @@ export const RegisterPage = () => {
         throw new Error('Error en el registro');
       }
 
-      // Parsear la respuesta
       const data = await response.json();
       const { token } = data;
-
-      // Almacenar el token en una cookie
       Cookies.set('auth_token', token, { expires: 100 }); 
-
       navigate('/inicio');
-
-      // Restablecer el estado de registro
-      setIsRegistering(false);
     } catch (error) {
       console.error('Error al registrar usuario:', error);
+    } finally {
       setIsRegistering(false);
     }
-  };
-
-  const onGoogleSignIn = () => {
-    // Implementar lógica de registro con Google aquí si es necesario
   };
 
   const toggleShowPassword = () => {
@@ -130,6 +122,8 @@ export const RegisterPage = () => {
                 name="name"
                 value={name}
                 onChange={onInputChange}
+                error={!!errors.name}
+                helperText={errors.name}
                 InputProps={{
                   startAdornment: <IconButton tabIndex={-1}> <PersonIcon /> </IconButton>,
                 }}
@@ -143,6 +137,8 @@ export const RegisterPage = () => {
                 name="phone"
                 value={phone}
                 onChange={onInputChange}
+                error={!!errors.phone}
+                helperText={errors.phone}
                 InputProps={{
                   startAdornment: <IconButton tabIndex={-1}> <PhoneIcon /></IconButton>,
                 }}
@@ -156,6 +152,8 @@ export const RegisterPage = () => {
                 name="email"
                 value={email}
                 onChange={onInputChange}
+                error={!!errors.email}
+                helperText={errors.email}
                 InputProps={{
                   startAdornment: <IconButton tabIndex={-1}> <EmailIcon /></IconButton>,
                 }}
@@ -213,6 +211,8 @@ export const RegisterPage = () => {
                 name="password"
                 value={password}
                 onChange={onInputChange}
+                error={!!errors.password}
+                helperText={errors.password}
                 InputProps={{
                   startAdornment: <IconButton tabIndex={-1} onClick={toggleShowPassword}> {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}</IconButton>,
                 }}
@@ -226,8 +226,8 @@ export const RegisterPage = () => {
                 name="confirmPassword"
                 value={confirmPassword}
                 onChange={onInputChange}
-                error={passwordError !== ''}
-                helperText={passwordError}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword}
                 InputProps={{
                   startAdornment: <IconButton tabIndex={-1} onClick={toggleShowConfirmPassword}> {showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}</IconButton>,
                 }}
@@ -249,3 +249,4 @@ export const RegisterPage = () => {
     </AuthLayout>
   );
 };
+

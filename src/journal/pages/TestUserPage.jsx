@@ -31,7 +31,7 @@ export const TestUserPage = () => {
                     throw new Error('Token no encontrado');
                 }
         
-                const userResponse = await axios.get(`https://c4f5-177-230-73-82.ngrok-free.app/get_current_user?token=${token}`, {
+                const userResponse = await axios.get(`https://dfbb-177-230-65-177.ngrok-free.app/get_current_user?token=${token}`, {
                     headers: { "ngrok-skip-browser-warning": "69420" }
                 });
         
@@ -47,7 +47,7 @@ export const TestUserPage = () => {
                     confirmPassword: user.password || '..........',
                 });
         
-                setUserId(user.id_students); // Aquí se guarda el userId obtenido de la respuesta
+                setUserId(user.id_students); 
             } catch (error) {
                 console.error('Error al obtener los datos del usuario:', error);
             }
@@ -74,7 +74,6 @@ export const TestUserPage = () => {
                 throw new Error('Token no encontrado');
             }
 
-            // Creación del payload para la solicitud PATCH con todos los campos
             const payload = {
                 name: formData.displayName,
                 telf: formData.phone,
@@ -85,9 +84,9 @@ export const TestUserPage = () => {
                 password: formData.password
             };
 
-            console.log('Datos enviados a la API:', payload); // Aquí se muestra en la consola lo que se envía a la API
+            console.log('Datos enviados a la API:', payload); 
 
-            const response = await axios.patch(`https://c4f5-177-230-73-82.ngrok-free.app/students_f/upd_students/${userId}?id_students=${userId}`, payload, {
+            const response = await axios.patch(`https://dfbb-177-230-65-177.ngrok-free.app/students_f/upd_students/${userId}?id_students=${userId}`, payload, {
                 headers: { 
                     "ngrok-skip-browser-warning": "69420",
                     "Content-Type": "application/json",

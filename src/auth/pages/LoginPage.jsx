@@ -35,7 +35,7 @@ export const LoginPage = () => {
       formData.append('client_id', '');
       formData.append('client_secret', '');
 
-      const response = await axios.post('https://c4f5-177-230-73-82.ngrok-free.app/loginuser', formData, {
+      const response = await axios.post('https://dfbb-177-230-65-177.ngrok-free.app/loginuser', formData, {
         headers: {
           "ngrok-skip-browser-warning": "69420",
           "Content-Type": "application/x-www-form-urlencoded"
@@ -43,7 +43,6 @@ export const LoginPage = () => {
       });
       console.log(response);
 
-      // Guardar el token en una cookie
       Cookies.set('access_token', response.data.access_token, { expires: 1 }); // 1 día de expiración
 
       dispatch(onLogin({ dataAcess: response.data.access_token, tokenType: response.data.token_type }));
@@ -141,11 +140,11 @@ export const LoginPage = () => {
               </Link>
             </Grid>
 
-            <Grid item xs={12} sx={{ textAlign: 'right' }}>
+          {/*   <Grid item xs={12} sx={{ textAlign: 'right' }}>
               <Link component={RouterLink} color="inherit" to="/auth/Contrasena">
                 ¿Olvidaste tu contraseña?
               </Link>
-            </Grid>
+            </Grid> */}
           </Grid>
         </form>
       </Box>
